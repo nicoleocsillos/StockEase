@@ -1,0 +1,595 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockEase | Inventory Management</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js" defer></script>
+</head>
+<body>
+
+    <!-- ADMIN LOGIN -->
+    <section class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-brand">Stock<span>Ease</span></div>
+            <p class="login-subtitle">Inventory Management System</p>
+
+            <form id="loginForm">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername"
+                       placeholder="Enter your username" required>
+
+                <label for="loginPassword">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="loginPassword"
+                           placeholder="Enter your password" required>
+                    <button type="button" id="togglePassword"
+                            class="toggle-password"
+                            aria-label="Show password"
+                            title="Show password">
+                        👁
+                    </button>
+                </div>
+
+                <p class="login-error" id="loginError" aria-live="polite"></p>
+                <button type="submit" class="login-button">Login</button>
+            </form>
+
+            <p class="login-footer">StockEase Admin Portal</p>
+        </div>
+    </section>
+
+    <!-- MAIN APPLICATION -->
+    <div class="app-shell" id="appShell" style="display:none;">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <a href="#" class="brand">Stock<span>Ease</span></a>
+
+            <p class="nav-label">MAIN MENU</p>
+            <nav id="mainNav">
+                <button class="nav-link active" data-page="dashboard">
+                    <span>▦</span> Dashboard
+                </button>
+                <button class="nav-link" data-page="products">
+                    <span>▣</span> Products
+                </button>
+                <button class="nav-link" data-page="orders">
+                    <span>🛒</span> Sales Orders
+                </button>
+                <button class="nav-link" data-page="suppliers">
+                    <span>♧</span> Suppliers
+                </button>
+                <button class="nav-link" data-page="reports">
+                    <span>▤</span> Reports
+                </button>
+            </nav>
+
+            <p class="nav-label support-label">SUPPORT</p>
+            <button class="nav-link" id="helpButton">
+                <span>?</span> Help
+            </button>
+            <button class="nav-link" id="resetButton">
+                <span>↻</span> Reset demo data
+            </button>
+
+            <div class="sidebar-bottom">
+                <b>StockEase Inventory</b><br>
+                <small>Inventory made simple.</small>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-area">
+
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">INVENTORY MANAGEMENT</p>
+                    <h1 id="pageTitle">Dashboard</h1>
+                </div>
+
+                <div class="top-actions">
+                    <div class="global-search">
+                        <span>⌕</span>
+                        <input type="search" id="globalSearch"
+                               placeholder="Search products...">
+                    </div>
+
+                    <div class="user-chip">
+                        <div class="avatar">A</div>
+                        <div>
+                            <b>Administrator</b>
+                            <small>System Admin</small>
+                        </div>
+                    </div>
+
+                    <button class="logout-button" id="logoutButton">
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            <div class="toast" id="toast" role="status"></div>
+
+            <!-- DASHBOARD -->
+            <section class="page active" id="dashboardPage">
+                <div class="page-heading">
+                    <div>
+                        <h2>Overview</h2>
+                        <p class="muted">Here's what's happening in your store.</p>
+                    </div>
+                    <span class="date-label" id="todayLabel"></span>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">₱</div>
+                        <div>
+                            <p>Today's Sales</p>
+                            <h3 id="todaySales">₱0.00</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">▣</div>
+                        <div>
+                            <p>Total Products</p>
+                            <h3 id="totalProducts">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">▤</div>
+                        <div>
+                            <p>Total Stock Units</p>
+                            <h3 id="totalUnits">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pink">!</div>
+                        <div>
+                            <p>Low Stock Alerts</p>
+                            <h3 id="lowStockCount">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Stock Overview</h2>
+                                <p class="muted">Quantity by product</p>
+                            </div>
+                            <button class="text-button" data-page-link="products">
+                                View products
+                            </button>
+                        </div>
+                        <div class="stock-bars" id="stockBars"></div>
+                        <div class="legend">
+                            <span><i class="dot blue-dot"></i>Stock units</span>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Low Stock Alerts</h2>
+                                <p class="muted">Products needing attention</p>
+                            </div>
+                        </div>
+                        <div class="simple-list" id="lowStockList"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Recent Orders</h2>
+                            <p class="muted">Latest sales transactions</p>
+                        </div>
+                        <button class="text-button" data-page-link="orders">
+                            View all orders
+                        </button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentOrders"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PRODUCTS -->
+            <section class="page" id="productsPage">
+                <div class="page-heading">
+                    <div>
+                        <h2>Product Inventory</h2>
+                        <p class="muted">Manage your products and stock levels.</p>
+                    </div>
+                    <button class="primary-button" id="addProductButton">
+                        + Add Product
+                    </button>
+                </div>
+
+                <div class="panel">
+                    <div class="filter-row">
+                        <input type="search" id="productSearch"
+                               placeholder="Search product, SKU, or category...">
+                        <select id="categoryFilter">
+                            <option value="all">All categories</option>
+                        </select>
+                        <select id="stockFilter">
+                            <option value="all">All stock levels</option>
+                            <option value="low">Low stock</option>
+                            <option value="available">In stock</option>
+                        </select>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productRows"></tbody>
+                        </table>
+                    </div>
+                    <p class="table-note" id="productCount"></p>
+                </div>
+            </section>
+
+            <!-- SALES ORDERS -->
+            <section class="page" id="ordersPage">
+                <div class="page-heading">
+                    <div>
+                        <h2>Sales Orders</h2>
+                        <p class="muted">Create and track customer orders.</p>
+                    </div>
+                    <button class="primary-button" id="addOrderButton">
+                        + Create Order
+                    </button>
+                </div>
+
+                <div class="panel">
+                    <div class="filter-row">
+                        <input type="search" id="orderSearch"
+                               placeholder="Search order or customer...">
+                        <select id="orderStatusFilter">
+                            <option value="all">All Statuses</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Packed">Packed</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Returned">Returned</option>
+                        </select>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Channel</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderRows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SUPPLIERS -->
+            <section class="page" id="suppliersPage">
+                <div class="page-heading">
+                    <div>
+                        <h2>Suppliers</h2>
+                        <p class="muted">Manage supplier contact information.</p>
+                    </div>
+                    <button class="primary-button" id="addSupplierButton">
+                        + Add Supplier
+                    </button>
+                </div>
+
+                <div class="panel">
+                    <div class="filter-row">
+                        <input type="search" id="supplierSearch"
+                               placeholder="Search supplier...">
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Supplier Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Products</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supplierRows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- REPORTS -->
+            <section class="page" id="reportsPage">
+                <div class="page-heading">
+                    <div>
+                        <h2>Reports</h2>
+                        <p class="muted">Review your inventory and sales performance.</p>
+                    </div>
+                    <div class="row-actions">
+                        <button class="secondary-button" id="exportCsvButton">
+                            Export CSV
+                        </button>
+                        <button class="primary-button" id="printReportButton">
+                            Print Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stat-grid report-stats">
+                    <div class="stat-card">
+                        <div>
+                            <p>Total Sales</p>
+                            <h3 id="reportSales">₱0.00</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div>
+                            <p>Total Orders</p>
+                            <h3 id="reportOrders">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div>
+                            <p>Total Suppliers</p>
+                            <h3 id="reportSuppliers">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Weekly Sales</h2>
+                                <p class="muted">Sales for the last seven days</p>
+                            </div>
+                        </div>
+                        <div class="weekly-chart" id="weeklySales"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Supplier Performance</h2>
+                                <p class="muted">Products associated with suppliers</p>
+                            </div>
+                        </div>
+                        <div class="performance-list" id="supplierPerformance"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Inventory Summary</h2>
+                            <p class="muted">Current stock levels for all products</p>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Quantity</th>
+                                    <th>Reorder Level</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportRows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <footer>© 2026 StockEase Inventory Management System</footer>
+        </main>
+    </div>
+
+    <!-- PRODUCT DIALOG -->
+    <dialog class="modal" id="productDialog">
+        <form id="productForm">
+            <div class="modal-heading">
+                <div>
+                    <h2 id="productDialogTitle">Add Product</h2>
+                    <p class="muted">Enter the product information.</p>
+                </div>
+                <button type="button" class="icon-button"
+                        data-close="productDialog">×</button>
+            </div>
+
+            <input type="hidden" id="productId">
+
+            <label>Product Name
+                <input type="text" id="productName" required>
+            </label>
+
+            <div class="form-grid">
+                <label>SKU
+                    <input type="text" id="productSku" required>
+                </label>
+                <label>Category
+                    <input type="text" id="productCategory" required>
+                </label>
+            </div>
+
+            <div class="form-grid">
+                <label>Price (₱)
+                    <input type="number" id="productPrice" min="0.01"
+                           step="0.01" required>
+                </label>
+                <label>Quantity
+                    <input type="number" id="productQty" min="0"
+                           step="1" required>
+                </label>
+            </div>
+
+            <label>Reorder Level
+                <input type="number" id="productReorder" min="0"
+                       step="1" value="5" required>
+            </label>
+
+            <p class="form-error" id="productError"></p>
+            <div class="modal-actions">
+                <button type="button" class="secondary-button"
+                        data-close="productDialog">Cancel</button>
+                <button type="submit" class="primary-button">Save Product</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- ORDER DIALOG -->
+    <dialog class="modal" id="orderDialog">
+        <form id="orderForm">
+            <div class="modal-heading">
+                <div>
+                    <h2>Create Sales Order</h2>
+                    <p class="muted">Enter the customer order details.</p>
+                </div>
+                <button type="button" class="icon-button"
+                        data-close="orderDialog">×</button>
+            </div>
+
+            <label>Customer Name
+                <input type="text" id="orderCustomer" required>
+            </label>
+
+            <div class="form-grid">
+                <label>Sales Channel
+                    <select id="orderChannel">
+                        <option value="Online">Online</option>
+                        <option value="In-store">In-store</option>
+                    </select>
+                </label>
+                <label>Product
+                    <select id="orderProduct" required></select>
+                </label>
+            </div>
+
+            <div class="form-grid">
+                <label>Quantity
+                    <input type="number" id="orderQty" min="1"
+                           step="1" value="1" required>
+                </label>
+                <label>Available Stock
+                    <input type="text" id="orderAvailable" readonly>
+                </label>
+            </div>
+
+            <p class="line-total" id="orderLineTotal">Line total: ₱0.00</p>
+            <p class="form-error" id="orderError"></p>
+
+            <div class="modal-actions">
+                <button type="button" class="secondary-button"
+                        data-close="orderDialog">Cancel</button>
+                <button type="submit" class="primary-button">Confirm Order</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- SUPPLIER DIALOG -->
+    <dialog class="modal" id="supplierDialog">
+        <form id="supplierForm">
+            <div class="modal-heading">
+                <div>
+                    <h2 id="supplierDialogTitle">Add Supplier</h2>
+                    <p class="muted">Enter supplier contact details.</p>
+                </div>
+                <button type="button" class="icon-button"
+                        data-close="supplierDialog">×</button>
+            </div>
+
+            <input type="hidden" id="supplierId">
+
+            <label>Supplier Name
+                <input type="text" id="supplierName" required>
+            </label>
+            <label>Email Address
+                <input type="email" id="supplierEmail" required>
+            </label>
+            <label>Phone Number
+                <input type="tel" id="supplierPhone" required>
+            </label>
+
+            <p class="form-error" id="supplierError"></p>
+            <div class="modal-actions">
+                <button type="button" class="secondary-button"
+                        data-close="supplierDialog">Cancel</button>
+                <button type="submit" class="primary-button">Save Supplier</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- INVOICE DIALOG -->
+    <dialog class="modal invoice-modal" id="invoiceDialog">
+        <div id="invoiceContent"></div>
+        <div class="modal-actions">
+            <button type="button" class="secondary-button"
+                    data-close="invoiceDialog">Close</button>
+            <button type="button" class="primary-button"
+                    id="printInvoiceButton">Print Invoice</button>
+        </div>
+    </dialog>
+
+    <!-- HELP DIALOG -->
+    <dialog class="modal" id="helpDialog">
+        <div class="modal-heading">
+            <div>
+                <h2>StockEase Help</h2>
+                <p class="muted">Quick guide to using the system.</p>
+            </div>
+            <button type="button" class="icon-button"
+                    data-close="helpDialog">×</button>
+        </div>
+
+        <p><b>Dashboard:</b> View your sales, products, stock units, and low-stock alerts.</p>
+        <p><b>Products:</b> Add, edit, delete, and search inventory products.</p>
+        <p><b>Sales Orders:</b> Create orders, view invoices, and update order statuses.</p>
+        <p><b>Suppliers:</b> Manage supplier contact information.</p>
+        <p><b>Reports:</b> View sales and inventory summaries, export CSV, and print reports.</p>
+
+        <div class="modal-actions">
+            <button type="button" class="primary-button"
+                    data-close="helpDialog">Got it</button>
+        </div>
+    </dialog>
+
+</body>
+</html>
